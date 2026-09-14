@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Parallax 4D — iPhone-Style Depth Effect</title>
+    <meta name="description" content="Turn any photo into an iPhone-grade 4D parallax depth effect — instantly in your browser, no upload needed." />
+    <meta property="og:title" content="Parallax 4D" />
+    <meta property="og:description" content="AI-powered 4D parallax depth effect in your browser" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+    <div id="app-shell" data-state="upload">
+
+      <!-- ── Upload State ─────────────────────────────────────────────── -->
+      <section id="upload-view" class="view" aria-label="Upload photo">
+        <div class="hero-bg" aria-hidden="true"></div>
+
+        <div class="upload-content">
+          <div class="logo">
+            <span class="logo-icon">◈</span>
+            <span class="logo-text">Parallax<strong>4D</strong></span>
+          </div>
+
+          <h1>4D Parallax Generator</h1>
+          <p class="subtitle">
+            Upload any photo. AI estimates depth and isolates subjects.<br/>
+            Move your mouse or tilt your phone — feel the authentic depth.
+          </p>
+
+          <div
+            id="drop-zone"
+            class="drop-zone"
+            role="button"
+            tabindex="0"
+            aria-label="Drop a photo here, or click to browse"
+          >
+            <div class="drop-zone-inner">
+              <div class="drop-icon" aria-hidden="true">
+                <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="6" y="10" width="36" height="28" rx="3" stroke="currentColor" stroke-width="2.5"/>
+                  <circle cx="16" cy="20" r="3" stroke="currentColor" stroke-width="2.5"/>
+                  <path d="M6 33l9-9 7 7 6-6 14 13" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/>
+                  <path d="M28 6v12M28 6l-4 4M28 6l4 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </div>
+              <p class="drop-primary">Drop your photo here</p>
+              <p class="drop-secondary">or <span class="link-text">click to browse</span></p>
+              <p class="drop-hint">Supports JPG, PNG, HEIC (iPhone) · Processed entirely on your device</p>
+            </div>
+            <input
+              type="file"
+              id="file-input"
+              accept="image/jpeg,image/png,image/heic,image/heif,image/webp"
+              aria-hidden="true"
+              tabindex="-1"
+            />
+          </div>
+
+          <p id="error-msg" class="error-msg" style="display:none" role="alert"></p>
+
+          <div class="feature-chips">
+            <span class="chip">🧠 Depth Anything AI</span>
+            <span class="chip">📱 iPhone Lock Screen Clock</span>
+            <span class="chip">🔮 4D Volumetric Shader</span>
+            <span class="chip">🔒 100% On-device & Private</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ── Processing State ─────────────────────────────────────────── -->
+      <section id="processing-view" class="view" aria-label="Processing" aria-live="polite">
+        <div class="processing-content">
+          <div class="processing-icon" aria-hidden="true">
+            <div class="spinner-ring"></div>
+            <span class="spinner-core">◈</span>
+          </div>
+          <h2>Generating 4D Parallax…</h2>
+          <p class="processing-sub">Running depth estimation and subject isolation on-device</p>
+
+          <div
+            id="progress-bar"
+            class="progress-bar"
+            role="progressbar"
+            aria-valuemin="0"
+            aria-valuemax="100"
+            aria-valuenow="0"
+          >
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <span id="progress-label" class="progress-label">Starting…</span>
+        </div>
+      </section>
+
+      <!-- ── Viewer State ──────────────────────────────────────────────── -->
+      <section id="viewer-view" class="view" aria-label="4D parallax viewer">
+        <canvas id="parallax-canvas" aria-label="4D parallax effect — move your device to feel depth"></canvas>
+
+        <!-- Top Floating Controls -->
+        <header class="top-bar">
+          <div class="settings-pill">
+            <button id="fit-toggle-btn" class="pill-btn active" title="Toggle between Fit Full Image and Fill Screen">
+              📐 Fit: Full
+            </button>
+            <div class="slider-wrapper" title="Adjust Depth Intensity">
+              <span class="slider-label">Depth</span>
+              <input type="range" id="intensity-slider" min="0.3" max="2.0" step="0.1" value="1.0" />
+            </div>
+          </div>
+        </header>
+
+        <!-- Bottom Floating Controls -->
+        <div class="viewer-controls">
+          <button id="gyro-btn" class="ctrl-btn gyro-btn" style="display:none" aria-label="Enable gyroscope">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M6.3 17.7A8 8 0 0 1 4 12c0-4.4 3.6-8 8-8s8 3.6 8 8a8 8 0 0 1-2.3 5.7"/>
+              <path d="M12 20v2M12 2v2M20 12h2M2 12h2"/>
+            </svg>
+            Enable Gyroscope
+          </button>
+
+          <button id="export-btn" class="ctrl-btn export-btn" aria-label="Export parallax as video">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download Live Wallpaper
+          </button>
+
+          <button id="retry-btn" class="ctrl-btn retry-btn" aria-label="Upload a different photo">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <polyline points="15 3 21 3 21 9"/>
+              <path d="M21 3L9 15"/>
+              <polyline points="9 21 3 21 3 15"/>
+              <path d="M3 21L15 9"/>
+            </svg>
+            New Photo
+          </button>
+        </div>
+
+        <div class="viewer-hint" aria-hidden="true">
+          Move cursor or tilt phone to feel the depth
+        </div>
+      </section>
+
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
