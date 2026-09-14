@@ -52,11 +52,12 @@ export function setupMotionSensors(
 
     // gamma: left/right tilt [-90, +90]
     // beta: front/back tilt [0, 180] (45° = natural phone holding angle)
-    const rawX = e.gamma / 75;
-    const rawY = (e.beta - 45) / 75;
+    // We map +/- 45 degrees to the [-1, 1] range to match mouse sensitivity
+    const rawX = Math.max(-1, Math.min(1, e.gamma / 45));
+    const rawY = Math.max(-1, Math.min(1, (e.beta - 45) / 45));
 
-    targetX = kfX.filter(rawX) * MAX_OFFSET;
-    targetY = kfY.filter(-rawY) * MAX_OFFSET;
+    targetX = kfX.filter(rawX) * MAX_OFFSET * 2;
+    targetY = kfY.filter(-rawY) * MAX_OFFSET * 2;
   };
 
   // ── Desktop: mouse ────────────────────────────────────────────────────────

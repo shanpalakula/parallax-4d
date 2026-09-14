@@ -44,8 +44,7 @@ export async function buildParallaxScene(
   const canvasH = canvas.clientHeight || canvas.height;
   renderer.setSize(canvasW, canvasH, false);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.0;
+  // Tone mapping removed to ensure 1:1 original color reproduction without contrast enhancement
 
   const maxAniso = renderer.capabilities.getMaxAnisotropy();
 

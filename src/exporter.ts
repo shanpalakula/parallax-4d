@@ -4,8 +4,13 @@ export async function recordParallaxVideo(
   onProgress?: (progress: number) => void
 ): Promise<Blob> {
   return new Promise((resolve, reject) => {
-    // 60 fps capture
-    const stream = canvas.captureStream(60);
+    // Mobile devices (especially Android) frequently OOM or crash when encoding high-res 60fps 12Mbps video
+    const isMobile = window.innerWidth <= 768;
+    const fps = isMobile ? 30 : 60;
+    const bps = isMobile ? 5_000_000 : 12_000_000; // 5 Mbps mobile, 12 Mbps desktop
+
+    // Capture at the determined framerate
+    const stream = canvas.captureStream(fps);
     
     // Try to get highest quality codec
     const mimeTypes = [
@@ -28,7 +33,7 @@ export async function recordParallaxVideo(
 
     const recorder = new MediaRecorder(stream, {
       mimeType: selectedMimeType,
-      videoBitsPerSecond: 12_000_000 // 12 Mbps for high quality
+      videoBitsPerSecond: bps
     });
 
     const chunks: Blob[] = [];
