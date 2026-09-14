@@ -23,6 +23,7 @@ const intensitySlider = document.getElementById('intensity-slider') as HTMLInput
 let currentScene: SceneController | null = null;
 let cleanupSensors: (() => void) | null = null;
 let currentFitMode: FitMode = 'contain';
+let currentFilename: string = 'live-wallpaper';
 
 // ── File Selection & Drag-and-Drop ─────────────────────────────────────────
 fileInput.addEventListener('change', () => {
@@ -111,7 +112,7 @@ exportBtn.addEventListener('click', async () => {
       exportScene!.updateOffset(Math.cos(angle) * radius, Math.sin(angle) * radius);
     });
     
-    downloadBlob(videoBlob, 'live-wallpaper.webm');
+    downloadBlob(videoBlob, `${currentFilename}-parallax-4d.webm`);
   } catch (err) {
     console.error('Export failed:', err);
     alert('Failed to export video. Your browser might not support MediaRecorder or WebGL max texture size was exceeded.');
@@ -133,6 +134,11 @@ gyroBtn.addEventListener('click', async () => {
 // ── Main Processing Pipeline ───────────────────────────────────────────────
 async function processFile(file: File): Promise<void> {
   try {
+    // Store original filename without extension
+    const parts = file.name.split('.');
+    if (parts.length > 1) parts.pop();
+    currentFilename = parts.join('.') || 'live-wallpaper';
+
     appShell.dataset.state = 'processing';
     setProgress('Loading image…', 2);
 
